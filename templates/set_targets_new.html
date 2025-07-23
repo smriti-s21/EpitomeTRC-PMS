@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Set Targets - EpitomeTRC{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Set Intern Targets</h2>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm btn-secondary">Back to Dashboard</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Intern Targets</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('save_targets') }}">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Intern Name</th>
+                                <th rowspan="2">Post</th>
+                                <th rowspan="2">POC</th>
+                                <th colspan="8" class="text-center bg-light">TND Targets</th>
+                                <th colspan="4" class="text-center bg-light">Category Targets</th>
+                            </tr>
+                            <tr>
+                                <th>MS Azure 900</th>
+                                <th>SEO Starter</th>
+                                <th>SEO + SMM</th>
+                                <th>DM-Crash</th>
+                                <th>8Hrs Job Ready</th>
+                                <th>Azure Combo</th>
+                                <th>TND Total</th>
+                                <th>Total Enrollments</th>
+                                <th>Recruitments</th>
+                                <th>College Collaborations</th>
+                                <th>Client Collaborations</th>
+                                <th>School DB Lead</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for intern in interns %}
+                            <tr>
+                                <td>{{ intern.name }}</td>
+                                <td>{{ intern.post }}</td>
+                                <td>{{ intern.poc_name }}</td>
+                                <!-- TND Targets -->
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="ms_azure_900_target_{{ intern.id }}" value="{{ intern.ms_azure_900_target or 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="seo_starter_target_{{ intern.id }}" value="{{ intern.seo_starter_target or 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="seo_smm_target_{{ intern.id }}" value="{{ intern.seo_smm_target or 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="dm_crash_target_{{ intern.id }}" value="{{ intern.dm_crash_target or 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="job_ready_target_{{ intern.id }}" value="{{ intern.job_ready_target or 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="azure_combo_target_{{ intern.id }}" value="{{ intern.azure_combo_target or 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="tnd_total_target_{{ intern.id }}" value="{{ intern.tnd_total_target or 10 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="target_{{ intern.id }}" value="{{ intern.target or 0 }}" min="0">
+                                </td>
+                                <!-- Category Targets -->
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="recruitment_target_{{ intern.id }}" value="{{ intern.recruitment_target or 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="college_db_target_{{ intern.id }}" value="{{ intern.college_db_target or 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="client_db_target_{{ intern.id }}" value="{{ intern.client_db_target or 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="school_lead_db_target_{{ intern.id }}" value="{{ intern.school_lead_db_target or 0 }}" min="0">
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end mt-3">
+                    <button type="submit" class="btn btn-orange">Save Targets</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

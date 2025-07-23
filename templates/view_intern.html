@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}View Intern - {{ intern.name }} - EpitomeTRC{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Intern Details: {{ intern.name }}</h2>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm btn-secondary">Back to Dashboard</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ intern.name }}</p>
+                    <p><strong>Email:</strong> {{ intern.email }}</p>
+                    <p><strong>Post:</strong> {{ intern.post }}</p>
+                    <p><strong>Date of Joining:</strong> {{ intern.doj }}</p>
+                    <p><strong>Reference Number:</strong> {{ intern.reference_number }}</p>
+                    <p><strong>POC:</strong> {{ intern.poc_name }}</p>
+                    <p><strong>Is POC:</strong> {{ 'Yes' if intern.is_poc else 'No' }}</p>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">TND Targets</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>TND Total Target:</strong> {{ intern.tnd_total_target or 10 }}</p>
+                    <p><strong>MS Azure 900 Target:</strong> {{ intern.ms_azure_900_target or 0 }}</p>
+                    <p><strong>SEO Starter Target:</strong> {{ intern.seo_starter_target or 0 }}</p>
+                    <p><strong>SEO + SMM Target:</strong> {{ intern.seo_smm_target or 0 }}</p>
+                    <p><strong>DM-Crash Target:</strong> {{ intern.dm_crash_target or 0 }}</p>
+                    <p><strong>8Hrs Job Ready Target:</strong> {{ intern.job_ready_target or 0 }}</p>
+                    <p><strong>Azure Combo Target:</strong> {{ intern.azure_combo_target or 0 }}</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Category Targets</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Total Enrollments Target:</strong> {{ intern.target or 0 }}</p>
+                    <p><strong>Recruitment Target:</strong> {{ intern.recruitment_target or 0 }}</p>
+                    <p><strong>College DB Target:</strong> {{ intern.college_db_target or 0 }}</p>
+                    <p><strong>Client DB Target:</strong> {{ intern.client_db_target or 0 }}</p>
+                    <p><strong>School Lead DB Target:</strong> {{ intern.school_lead_db_target or 0 }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Performance History</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Total Enrollments</th>
+                                    <th>MS Azure 900</th>
+                                    <th>SEO Starter</th>
+                                    <th>SEO + SMM</th>
+                                    <th>DM-Crash</th>
+                                    <th>8Hrs Job Ready</th>
+                                    <th>Azure Combo</th>
+                                    <th>Recruitment</th>
+                                    <th>College DB</th>
+                                    <th>Client DB</th>
+                                    <th>School Lead DB</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in entries %}
+                                <tr>
+                                    <td>{{ entry.date }}</td>
+                                    <td>{{ entry.total_enrollments }}</td>
+                                    <td>{{ entry.ms_azure_900 }}</td>
+                                    <td>{{ entry.seo_starter }}</td>
+                                    <td>{{ entry.seo_smm }}</td>
+                                    <td>{{ entry.dm_crash }}</td>
+                                    <td>{{ entry.job_ready }}</td>
+                                    <td>{{ entry.azure_combo }}</td>
+                                    <td>{{ entry.recruitment }}</td>
+                                    <td>{{ entry.college_db }}</td>
+                                    <td>{{ entry.client_db }}</td>
+                                    <td>{{ entry.school_lead_db }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

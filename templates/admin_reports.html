@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports - EpitomeTRC{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">PMS Reports</h2>
+
+<div class="card shadow mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Filter Reports</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('admin_reports') }}">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label for="user_id" class="form-label">Intern</label>
+                    <select class="form-select" id="user_id" name="user_id">
+                        <option value="">All Interns</option>
+                        {% for intern in interns %}
+                            <option value="{{ intern.id }}" {% if request.args.get('user_id')|int == intern.id %}selected{% endif %}>
+                                {{ intern.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="section" class="form-label">Section</label>
+                    <select class="form-select" id="section" name="section">
+                        <option value="">All Sections</option>
+                        {% for section in sections %}
+                            <option value="{{ section }}" {% if request.args.get('section') == section %}selected{% endif %}>
+                                {{ section }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="start_date" class="form-label">Start Date</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request.args.get('start_date', '') }}">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="end_date" class="form-label">End Date</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request.args.get('end_date', '') }}">
+                </div>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-orange">Apply Filters</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-header">
+        <h5 class="mb-0">PMS Entries</h5>
+    </div>
+    <div class="card-body">
+        {% if entries %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Intern</th>
+                            <th>Section</th>
+                            <th>MTD</th>
+                            {% if request.args.get('section') == 'RECRUITMENT' %}
+                                <th>Applications</th>
+                                <th>Interviewed</th>
+                                <th>On Hold</th>
+                                <th>Shortlisted</th>
+                                <th>Rejected</th>
+                            {% elif request.args.get('section') %}
+                                <th>Leads Generated</th>
+                                <th>Leads Contacted</th>
+                                <th>Prospects</th>
+                                <th>Suspects</th>
+                            {% else %}
+                                <th>Details</th>
+                            {% endif %}
+                            <th>Support Required</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in entries %}
+                            <tr>
+                                <td>{{ entry.date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ entry.user.name }}</td>
+                                <td>{{ entry.section }}</td>
+                                <td>{{ entry.mtd_leads }}</td>
+                                {% if entry.section == 'RECRUITMENT' and request.args.get('section') == 'RECRUITMENT' %}
+                                    <td>{{ entry.applications_received }}</td>
+                                    <td>{{ entry.interviewed }}</td>
+                                    <td>{{ entry.on_hold }}</td>
+                                    <td>{{ entry.shortlisted }}</td>
+                                    <td>{{ entry.rejected }}</td>
+                                {% elif entry.section != 'RECRUITMENT' and request.args.get('section') and request.args.get('section') != 'RECRUITMENT' %}
+                                    <td>{{ entry.daily_leads_generated }}</td>
+                                    <td>{{ entry.daily_leads_contacted }}</td>
+                                    <td>{{ entry.daily_prospects }}</td>
+                                    <td>{{ entry.daily_suspects }}</td>
+                                {% elif not request.args.get('section') %}
+                                    <td>
+                                        {% if entry.section == 'RECRUITMENT' %}
+                                            Apps: {{ entry.applications_received }}, 
+                                            Int: {{ entry.interviewed }}, 
+                                            Hold: {{ entry.on_hold }}, 
+                                            Short: {{ entry.shortlisted }}, 
+                                            Rej: {{ entry.rejected }}
+                                        {% else %}
+                                            Gen: {{ entry.daily_leads_generated }}, 
+                                            Cont: {{ entry.daily_leads_contacted }}, 
+                                            Pros: {{ entry.daily_prospects }}, 
+                                            Susp: {{ entry.daily_suspects }}
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
+                                <td>{{ entry.support_required }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">No entries found matching the selected filters.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

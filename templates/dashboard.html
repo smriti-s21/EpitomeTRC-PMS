@@ -1,0 +1,564 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - EpitomeTRC{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
+<style>
+    .nav-pills .nav-link.active {
+        background-color: var(--orange);
+    }
+    .nav-pills .nav-link {
+        color: #333;
+    }
+    .dashboard-card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(255, 107, 0, 0.15);
+    }
+    .progress {
+        height: 10px;
+        border-radius: 5px;
+    }
+    .progress-bar {
+        background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+    .metric-card {
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    .metric-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 10px rgba(0,0,0,0.08);
+    }
+    .metric-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--orange);
+    }
+    .metric-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .metric-icon {
+        font-size: 2rem;
+        color: var(--orange-light);
+        opacity: 0.7;
+    }
+    .tab-pane {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Dashboard</h2>
+    <div>
+        <span class="badge bg-orange">{{ now.strftime('%Y-%m-%d') }}</span>
+    </div>
+</div>
+
+<!-- Main navigation tabs -->
+<ul class="nav nav-pills mb-4" id="mainTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="input-tab" data-bs-toggle="tab" data-bs-target="#input" type="button" role="tab">
+            <i class="fas fa-edit me-2"></i>Data Input
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button" role="tab">
+            <i class="fas fa-chart-bar me-2"></i>Reports & Analytics
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="mainTabContent">
+    <!-- Data Input Tab -->
+    <div class="tab-pane fade show active" id="input" role="tabpanel">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card dashboard-card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user me-2"></i>Your Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-orange-lightest p-3 rounded-circle me-3">
+                                <i class="fas fa-user-circle fa-2x text-orange"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">{{ current_user.name }}</h5>
+                                <p class="text-muted mb-0">{{ current_user.role|title }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Today's Progress</label>
+                            <div class="progress mb-2">
+                                <div class="progress-bar" role="progressbar" style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">65% of daily target completed</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Monthly Progress</label>
+                            <div class="progress mb-2">
+                                <div class="progress-bar" role="progressbar" style="width: 42%;" aria-valuenow="42" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">42% of monthly target completed</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8 mb-4">
+                <div class="card dashboard-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Update PMS Data</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs mb-3" id="sectionTabs" role="tablist">
+                            {% for section in sections %}
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link {% if loop.first %}active{% endif %}" 
+                                            id="{{ section|lower|replace(' ', '-') }}-tab" 
+                                            data-bs-toggle="tab" 
+                                            data-bs-target="#{{ section|lower|replace(' ', '-') }}" 
+                                            type="button" 
+                                            role="tab">
+                                        {{ section }}
+                                    </button>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        
+                        <div class="tab-content" id="sectionTabsContent">
+                            {% for section in sections %}
+                                <div class="tab-pane fade {% if loop.first %}show active{% endif %}" 
+                                     id="{{ section|lower|replace(' ', '-') }}" 
+                                     role="tabpanel">
+                                    
+                                    <form method="POST" action="{{ url_for('update_pms') }}">
+                                        <input type="hidden" name="section" value="{{ section }}">
+                                        
+                                        {% if section == 'RECRUITMENT' %}
+                                            <div class="row mb-3">
+                                                <div class="col-md-12">
+                                                    <label for="mtd_leads" class="form-label">Total Number of Applications Received</label>
+                                                    <input type="number" class="form-control" id="mtd_leads" name="mtd_leads" 
+                                                           value="{{ entries_by_section[section].mtd_leads if entries_by_section[section] else 0 }}" min="0">
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-4">
+                                                    <label for="applications_received" class="form-label">Applications Received</label>
+                                                    <input type="number" class="form-control" id="applications_received" name="applications_received" 
+                                                           value="{{ entries_by_section[section].applications_received if entries_by_section[section] else 0 }}" min="0">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="interviewed" class="form-label">Interviewed Candidates</label>
+                                                    <input type="number" class="form-control" id="interviewed" name="interviewed" 
+                                                           value="{{ entries_by_section[section].interviewed if entries_by_section[section] else 0 }}" min="0">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="on_hold" class="form-label">On Hold</label>
+                                                    <input type="number" class="form-control" id="on_hold" name="on_hold" 
+                                                           value="{{ entries_by_section[section].on_hold if entries_by_section[section] else 0 }}" min="0">
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="shortlisted" class="form-label">Shortlisted</label>
+                                                    <input type="number" class="form-control" id="shortlisted" name="shortlisted" 
+                                                           value="{{ entries_by_section[section].shortlisted if entries_by_section[section] else 0 }}" min="0">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="rejected" class="form-label">Rejected/Not Eligible</label>
+                                                    <input type="number" class="form-control" id="rejected" name="rejected" 
+                                                           value="{{ entries_by_section[section].rejected if entries_by_section[section] else 0 }}" min="0">
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <div class="row mb-3">
+                                                <div class="col-md-4">
+                                                    <label for="mtd_leads" class="form-label">MTD Leads</label>
+                                                    <input type="number" class="form-control" id="mtd_leads" name="mtd_leads" 
+                                                           value="{{ entries_by_section[section].mtd_leads if entries_by_section[section] else 0 }}" min="0">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="daily_leads_generated" class="form-label">Leads Generated Today</label>
+                                                    <input type="number" class="form-control" id="daily_leads_generated" name="daily_leads_generated" 
+                                                           value="{{ entries_by_section[section].daily_leads_generated if entries_by_section[section] else 0 }}" min="0">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="daily_leads_contacted" class="form-label">Leads Contacted Today</label>
+                                                    <input type="number" class="form-control" id="daily_leads_contacted" name="daily_leads_contacted" 
+                                                           value="{{ entries_by_section[section].daily_leads_contacted if entries_by_section[section] else 0 }}" min="0">
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="daily_prospects" class="form-label">Prospects Today</label>
+                                                    <input type="number" class="form-control" id="daily_prospects" name="daily_prospects" 
+                                                           value="{{ entries_by_section[section].daily_prospects if entries_by_section[section] else 0 }}" min="0">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="daily_suspects" class="form-label">Suspects Today</label>
+                                                    <input type="number" class="form-control" id="daily_suspects" name="daily_suspects" 
+                                                           value="{{ entries_by_section[section].daily_suspects if entries_by_section[section] else 0 }}" min="0">
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="mb-3">
+                                            <label for="support_required" class="form-label">Support/Help Required</label>
+                                            <textarea class="form-control" id="support_required" name="support_required" rows="3">{{ entries_by_section[section].support_required if entries_by_section[section] else '' }}</textarea>
+                                        </div>
+                                        
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-orange">
+                                                <i class="fas fa-save me-2"></i> Save {{ section }} Data
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reports & Analytics Tab -->
+    <div class="tab-pane fade" id="reports" role="tabpanel">
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="metric-value">85%</div>
+                            <div class="metric-label">Target Achievement</div>
+                        </div>
+                        <div class="metric-icon">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="metric-value">124</div>
+                            <div class="metric-label">Total Leads</div>
+                        </div>
+                        <div class="metric-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="metric-value">37</div>
+                            <div class="metric-label">Prospects</div>
+                        </div>
+                        <div class="metric-icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="metric-value">18</div>
+                            <div class="metric-label">Conversions</div>
+                        </div>
+                        <div class="metric-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8 mb-4">
+                <div class="card dashboard-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Performance Metrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs mb-3" id="chartTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="monthly-tab" data-bs-toggle="tab" data-bs-target="#monthly" type="button" role="tab">Monthly</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="weekly-tab" data-bs-toggle="tab" data-bs-target="#weekly" type="button" role="tab">Weekly</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="daily-tab" data-bs-toggle="tab" data-bs-target="#daily" type="button" role="tab">Daily</button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content" id="chartTabsContent">
+                            <div class="tab-pane fade show active" id="monthly" role="tabpanel">
+                                <div class="chart-container">
+                                    <canvas id="monthlyChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="weekly" role="tabpanel">
+                                <div class="chart-container">
+                                    <canvas id="weeklyChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="daily" role="tabpanel">
+                                <div class="chart-container">
+                                    <canvas id="dailyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card dashboard-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Target vs Achievement</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="targetChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card dashboard-card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-users me-2"></i>Team Performance</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Team structure management will be available soon. Please check back later.
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">TND Team</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted">Team progress: 78%</p>
+                                <div class="progress mb-3">
+                                    <div class="progress-bar" role="progressbar" style="width: 78%;" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">COLLEGE COLLAB Team</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted">Team progress: 65%</p>
+                                <div class="progress mb-3">
+                                    <div class="progress-bar" role="progressbar" style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">RECRUITMENT Team</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted">Team progress: 82%</p>
+                                <div class="progress mb-3">
+                                    <div class="progress-bar" role="progressbar" style="width: 82%;" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script>
+    // Monthly Chart
+    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+    const monthlyChart = new Chart(monthlyCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [
+                {
+                    label: 'Target',
+                    data: [150, 150, 150, 150, 150, 150],
+                    backgroundColor: 'rgba(200, 200, 200, 0.5)',
+                    borderColor: 'rgba(200, 200, 200, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Achievement',
+                    data: [120, 135, 145, 130, 125, 110],
+                    backgroundColor: 'rgba(255, 107, 0, 0.5)',
+                    borderColor: 'rgba(255, 107, 0, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Weekly Chart
+    const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
+    const weeklyChart = new Chart(weeklyCtx, {
+        type: 'line',
+        data: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [
+                {
+                    label: 'Target',
+                    data: [35, 35, 35, 35],
+                    backgroundColor: 'rgba(200, 200, 200, 0.2)',
+                    borderColor: 'rgba(200, 200, 200, 1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.4
+                },
+                {
+                    label: 'Achievement',
+                    data: [28, 32, 38, 30],
+                    backgroundColor: 'rgba(255, 107, 0, 0.2)',
+                    borderColor: 'rgba(255, 107, 0, 1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Daily Chart
+    const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+    const dailyChart = new Chart(dailyCtx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [
+                {
+                    label: 'Target',
+                    data: [5, 5, 5, 5, 5, 5, 5],
+                    backgroundColor: 'rgba(200, 200, 200, 0.2)',
+                    borderColor: 'rgba(200, 200, 200, 1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.4
+                },
+                {
+                    label: 'Achievement',
+                    data: [4, 6, 3, 7, 5, 4, 2],
+                    backgroundColor: 'rgba(255, 107, 0, 0.2)',
+                    borderColor: 'rgba(255, 107, 0, 1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Target Chart
+    const targetCtx = document.getElementById('targetChart').getContext('2d');
+    const targetChart = new Chart(targetCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Achieved', 'Remaining'],
+            datasets: [{
+                data: [85, 15],
+                backgroundColor: [
+                    'rgba(255, 107, 0, 0.8)',
+                    'rgba(200, 200, 200, 0.5)'
+                ],
+                borderColor: [
+                    'rgba(255, 107, 0, 1)',
+                    'rgba(200, 200, 200, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

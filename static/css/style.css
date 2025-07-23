@@ -1,0 +1,103 @@
+:root {
+    --orange: #FF6B00;
+    --orange-light: #FF9248;
+    --orange-lightest: #FFF0E6;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar {
+    background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
+}
+
+.footer {
+    background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
+}
+
+.btn-orange {
+    background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
+    border: none;
+    color: white;
+}
+
+.btn-orange:hover {
+    background: linear-gradient(135deg, #e66000 0%, #e68341 100%);
+    color: white;
+}
+
+.text-orange {
+    color: var(--orange) !important;
+}
+
+.bg-orange {
+    background-color: var(--orange) !important;
+    color: white;
+}
+
+.bg-orange-light {
+    background-color: var(--orange-light) !important;
+    color: white;
+}
+
+.bg-orange-lightest {
+    background-color: var(--orange-lightest) !important;
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
+    color: white;
+    border: none;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--orange);
+    font-weight: 600;
+    border-bottom: 2px solid var(--orange);
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+}
+
+.nav-tabs .nav-link:hover {
+    border-bottom: 2px solid var(--orange-light);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: var(--orange-lightest);
+}
+
+.team-member:hover {
+    background-color: var(--orange-lightest);
+}
+
+.card {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-header h5 {
+    margin-bottom: 0;
+}
+
+.badge {
+    font-weight: 500;
+    padding: 0.4em 0.6em;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--orange-light);
+    box-shadow: 0 0 0 0.25rem rgba(255, 107, 0, 0.25);
+}
+
+.alert-info {
+    background-color: var(--orange-lightest);
+    border-color: var(--orange-light);
+    color: #664d03;
+}

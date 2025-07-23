@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Intern Dashboard - EpitomeTRC{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Welcome, {{ current_user.name }}</h2>
+
+<div class="alert alert-info">
+    <strong>Today's Date:</strong> {{ now.strftime('%Y-%m-%d') }}
+</div>
+
+<ul class="nav nav-tabs mb-4" id="sectionTabs" role="tablist">
+    {% for section in sections %}
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if loop.first %}active{% endif %}" 
+                    id="{{ section|lower|replace(' ', '-') }}-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#{{ section|lower|replace(' ', '-') }}" 
+                    type="button" 
+                    role="tab">
+                {{ section }}
+            </button>
+        </li>
+    {% endfor %}
+</ul>
+
+<div class="tab-content">
+    {% for section in sections %}
+        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" 
+             id="{{ section|lower|replace(' ', '-') }}" 
+             role="tabpanel">
+            
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ section }} - Daily Update</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('update_pms') }}">
+                        <input type="hidden" name="section" value="{{ section }}">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="mtd_leads" class="form-label">MTD Leads</label>
+                                <input type="number" class="form-control" id="mtd_leads" name="mtd_leads" 
+                                       value="{{ entries_by_section[section].mtd_leads if entries_by_section[section] else 0 }}" min="0">
+                            </div>
+                        </div>
+                        
+                        {% if section == 'RECRUITMENT' %}
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="applications_received" class="form-label">Applications Received</label>
+                                    <input type="number" class="form-control" id="applications_received" name="applications_received" 
+                                           value="{{ entries_by_section[section].applications_received if entries_by_section[section] else 0 }}" min="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="interviewed" class="form-label">Interviewed Candidates</label>
+                                    <input type="number" class="form-control" id="interviewed" name="interviewed" 
+                                           value="{{ entries_by_section[section].interviewed if entries_by_section[section] else 0 }}" min="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="on_hold" class="form-label">On Hold</label>
+                                    <input type="number" class="form-control" id="on_hold" name="on_hold" 
+                                           value="{{ entries_by_section[section].on_hold if entries_by_section[section] else 0 }}" min="0">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="shortlisted" class="form-label">Shortlisted</label>
+                                    <input type="number" class="form-control" id="shortlisted" name="shortlisted" 
+                                           value="{{ entries_by_section[section].shortlisted if entries_by_section[section] else 0 }}" min="0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="rejected" class="form-label">Rejected/Not Eligible</label>
+                                    <input type="number" class="form-control" id="rejected" name="rejected" 
+                                           value="{{ entries_by_section[section].rejected if entries_by_section[section] else 0 }}" min="0">
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="daily_leads_generated" class="form-label">Leads Generated Today</label>
+                                    <input type="number" class="form-control" id="daily_leads_generated" name="daily_leads_generated" 
+                                           value="{{ entries_by_section[section].daily_leads_generated if entries_by_section[section] else 0 }}" min="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="daily_leads_contacted" class="form-label">Leads Contacted Today</label>
+                                    <input type="number" class="form-control" id="daily_leads_contacted" name="daily_leads_contacted" 
+                                           value="{{ entries_by_section[section].daily_leads_contacted if entries_by_section[section] else 0 }}" min="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="daily_prospects" class="form-label">Prospects Today</label>
+                                    <input type="number" class="form-control" id="daily_prospects" name="daily_prospects" 
+                                           value="{{ entries_by_section[section].daily_prospects if entries_by_section[section] else 0 }}" min="0">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <label for="daily_suspects" class="form-label">Suspects Today</label>
+                                    <input type="number" class="form-control" id="daily_suspects" name="daily_suspects" 
+                                           value="{{ entries_by_section[section].daily_suspects if entries_by_section[section] else 0 }}" min="0">
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="support_required" class="form-label">Support/Help Required</label>
+                            <textarea class="form-control" id="support_required" name="support_required" rows="3">{{ entries_by_section[section].support_required if entries_by_section[section] else '' }}</textarea>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-orange">Save {{ section }} Data</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

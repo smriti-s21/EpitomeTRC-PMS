@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}Update Intern Numbers - EpitomeTRC{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Update Intern Numbers</h2>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm btn-secondary">Back to Dashboard</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Intern Performance Data</h5>
+                <div>
+                    <select class="form-select form-select-sm" id="internFilter" style="width: 200px;">
+                        <option value="all">All Interns</option>
+                        {% for intern in interns %}
+                        <option value="{{ intern.id }}">{{ intern.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('save_intern_numbers') }}">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Intern Name</th>
+                                <th>Post</th>
+                                <th>Total Enrollments</th>
+                                <th>MS Azure 900</th>
+                                <th>SEO Starter</th>
+                                <th>SEO + SMM</th>
+                                <th>DM-Crash</th>
+                                <th>8Hrs Job Ready</th>
+                                <th>Azure Combo</th>
+                                <th>Recruitment</th>
+                                <th>College DB</th>
+                                <th>Client DB</th>
+                                <th>School Lead DB</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for intern in interns %}
+                            {% set entry = intern.pms_entries[0] if intern.pms_entries|length > 0 else None %}
+                            <tr class="intern-row" data-intern-id="{{ intern.id }}">
+                                <td>{{ intern.name }}</td>
+                                <td>{{ intern.post }}</td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="total_enrollments_{{ intern.id }}" 
+                                           value="{{ entry.total_enrollments if entry else 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="ms_azure_900_{{ intern.id }}" 
+                                           value="{{ entry.ms_azure_900 if entry else 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="seo_starter_{{ intern.id }}" 
+                                           value="{{ entry.seo_starter if entry else 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="seo_smm_{{ intern.id }}" 
+                                           value="{{ entry.seo_smm if entry else 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="dm_crash_{{ intern.id }}" 
+                                           value="{{ entry.dm_crash if entry else 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="job_ready_{{ intern.id }}" 
+                                           value="{{ entry.job_ready if entry else 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="azure_combo_{{ intern.id }}" 
+                                           value="{{ entry.azure_combo if entry else 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="recruitment_{{ intern.id }}" 
+                                           value="{{ entry.recruitment if entry else 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="college_db_{{ intern.id }}" 
+                                           value="{{ entry.college_db if entry else 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="client_db_{{ intern.id }}" 
+                                           value="{{ entry.client_db if entry else 0 }}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" 
+                                           name="school_lead_db_{{ intern.id }}" 
+                                           value="{{ entry.school_lead_db if entry else 0 }}" min="0">
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end mt-3">
+                    <button type="submit" class="btn btn-orange">Save Numbers</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.getElementById('internFilter').addEventListener('change', function() {
+        const selectedInternId = this.value;
+        const internRows = document.querySelectorAll('.intern-row');
+        
+        internRows.forEach(row => {
+            if (selectedInternId === 'all' || row.getAttribute('data-intern-id') === selectedInternId) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

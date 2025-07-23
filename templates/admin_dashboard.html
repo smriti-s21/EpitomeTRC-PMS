@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - EpitomeTRC{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Admin Dashboard</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h6>Total Interns</h6>
+                            <h3 class="text-orange">{{ interns|length }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h6>Today's Entries</h6>
+                            <h3 class="text-orange">{{ entries|length }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('admin_reports') }}" class="btn btn-orange mb-2">View Reports</a>
+                    <a href="{{ url_for('manage_targets') }}" class="btn btn-orange mb-2">Set Intern Targets</a>
+                    <a href="{{ url_for('manage_intern_numbers') }}" class="btn btn-orange">Update Intern Numbers</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Regular entries table -->
+<div class="card shadow mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Today's PMS Entries</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Intern</th>
+                        <th>Section</th>
+                        <th>MTD</th>
+                        <th>Leads Generated</th>
+                        <th>Leads Contacted</th>
+                        <th>Prospects</th>
+                        <th>Suspects</th>
+                        <th>Support Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in entries %}
+                        {% if entry.section != 'RECRUITMENT' %}
+                        <tr>
+                            <td>{{ entry.user.name }}</td>
+                            <td>{{ entry.section }}</td>
+                            <td>{{ entry.mtd_leads }}</td>
+                            <td>{{ entry.daily_leads_generated }}</td>
+                            <td>{{ entry.daily_leads_contacted }}</td>
+                            <td>{{ entry.daily_prospects }}</td>
+                            <td>{{ entry.daily_suspects }}</td>
+                            <td>{{ entry.support_required }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Recruitment entries table -->
+<div class="card shadow">
+    <div class="card-header">
+        <h5 class="mb-0">Today's Recruitment Entries</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Intern</th>
+                        <th>Total Applications</th>
+                        <th>Applications Received</th>
+                        <th>Interviewed</th>
+                        <th>On Hold</th>
+                        <th>Shortlisted</th>
+                        <th>Rejected</th>
+                        <th>Support Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in entries %}
+                        {% if entry.section == 'RECRUITMENT' %}
+                        <tr>
+                            <td>{{ entry.user.name }}</td>
+                            <td>{{ entry.mtd_leads }}</td>
+                            <td>{{ entry.applications_received }}</td>
+                            <td>{{ entry.interviewed }}</td>
+                            <td>{{ entry.on_hold }}</td>
+                            <td>{{ entry.shortlisted }}</td>
+                            <td>{{ entry.rejected }}</td>
+                            <td>{{ entry.support_required }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if not entries %}
+<div class="alert alert-info">No entries for today yet.</div>
+{% endif %}
+
+<!-- All Interns -->
+<div class="card shadow mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">All Interns</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Post</th>
+                        <th>POC</th>
+                        <th>DOJ</th>
+                        <th>Target</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for intern in interns %}
+                    <tr>
+                        <td>{{ intern.name }}</td>
+                        <td>{{ intern.post }}</td>
+                        <td>{{ intern.poc_name }}</td>
+                        <td>{{ intern.doj }}</td>
+                        <td>{{ intern.target }}</td>
+                        <td>
+                            <a href="{{ url_for('view_intern', intern_id=intern.id) }}" class="btn btn-sm btn-primary">View Details</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
